@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tracemark | watermark an ID in your browser</title>
+<meta name="description" content="Watermark a passport or ID copy in your browser before you share it — a crop-proof lattice plus a traceable label.">
+<meta property="og:title" content="tracemark">
+<meta property="og:description" content="Watermark a passport or ID copy in your browser before you share it.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://andreaaguiar.github.io/tracemark/">
+<meta property="og:image" content="https://andreaaguiar.github.io/tracemark/id-watermarked.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://andreaaguiar.github.io/tracemark/id-watermarked.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2032%2032%27%3E%3Crect%20width%3D%2732%27%20height%3D%2732%27%20rx%3D%277%27%20fill%3D%27%232f6bff%27%2F%3E%3Cg%20stroke%3D%27%23fff%27%20stroke-width%3D%272.2%27%20stroke-linecap%3D%27round%27%20fill%3D%27none%27%3E%3Cg%20opacity%3D%270.55%27%20stroke-dasharray%3D%273%203.5%27%3E%3Cline%20x1%3D%274%27%20y1%3D%274%27%20x2%3D%2711%27%20y2%3D%2711%27%2F%3E%3Cline%20x1%3D%2721%27%20y1%3D%2721%27%20x2%3D%2728%27%20y2%3D%2728%27%2F%3E%3Cline%20x1%3D%2728%27%20y1%3D%274%27%20x2%3D%2721%27%20y2%3D%2711%27%2F%3E%3Cline%20x1%3D%2711%27%20y1%3D%2721%27%20x2%3D%274%27%20y2%3D%2728%27%2F%3E%3C%2Fg%3E%3Cline%20x1%3D%2713%27%20y1%3D%2713%27%20x2%3D%2719%27%20y2%3D%2719%27%2F%3E%3Cline%20x1%3D%2719%27%20y1%3D%2713%27%20x2%3D%2713%27%20y2%3D%2719%27%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E">
+<style>
+  :root {
+    --bg: #0f1115; --panel: #191c22; --border: #2a2f3a; --text: #e7e9ee;
+    --muted: #9aa3b2; --accent: #4f8cff; --accent-hover: #3f7bef;
+    --field: #12151b;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f4f6fa; --panel: #ffffff; --border: #dfe3ea; --text: #1a1d23;
+      --muted: #626b7a; --accent: #2f6bff; --accent-hover: #2559e6; --field: #ffffff;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); padding: 24px;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; }
+  header h1 { margin: 0 0 4px; font-size: 24px; letter-spacing: -0.01em; }
+  header p { margin: 0 0 4px; color: var(--muted); }
+  .layout { display: grid; grid-template-columns: 320px 1fr; gap: 24px; margin-top: 24px; }
+  @media (max-width: 780px) { .layout { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 5px; }
+  label:first-of-type { margin-top: 0; }
+  input[type=text], input[type=date] {
+    width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 8px;
+    background: var(--field); color: var(--text); font-size: 14px;
+  }
+  input.invalid { border-color: #e5484d; }
+  .row { display: flex; gap: 10px; align-items: center; }
+  input[type=color] { width: 44px; height: 38px; padding: 0; border: 1px solid var(--border); border-radius: 8px; background: var(--field); cursor: pointer; overflow: hidden; }
+  input[type=color]::-webkit-color-swatch-wrapper { padding: 0; }
+  input[type=color]::-webkit-color-swatch { border: none; border-radius: 7px; }
+  input[type=color]::-moz-color-swatch { border: none; border-radius: 7px; }
+  .filebtn {
+    display: inline-block; width: 100%; text-align: center; padding: 10px; border: 1px dashed var(--border);
+    border-radius: 8px; background: var(--field); color: var(--muted); cursor: pointer; font-size: 14px;
+  }
+  .filebtn:hover { border-color: var(--accent); color: var(--text); }
+  .filebtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-color: var(--accent); color: var(--text); }
+  .filebtn .hint { font-size: 12px; opacity: .7; }
+  input[type=file] { display: none; }
+  .filename { font-size: 12px; color: var(--muted); margin-top: 6px; word-break: break-all; }
+  button.primary {
+    width: 100%; margin-top: 18px; padding: 11px; border: 0; border-radius: 8px;
+    background: var(--accent); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  }
+  button.primary:hover { background: var(--accent-hover); }
+  button.primary:disabled { opacity: .5; cursor: not-allowed; }
+  .preview { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px;
+    display: flex; align-items: center; justify-content: center; min-height: 340px; }
+  .preview canvas { max-width: 100%; height: auto; border-radius: 6px; box-shadow: 0 4px 24px rgba(0,0,0,.25); }
+  .preview.dragover { border-color: var(--accent); border-style: dashed; }
+  .preview .empty { color: var(--muted); text-align: center; }
+  .opacityval { color: var(--muted); font-size: 12px; }
+  input[type=range] { width: 100%; }
+  footer { margin-top: 24px; color: var(--muted); font-size: 12px; }
+  code { background: var(--field); border: 1px solid var(--border); border-radius: 4px; padding: 1px 5px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>tracemark</h1>
+    <p>Stamp a passport or ID copy with a tamper-evident watermark before you share it.</p>
+  </header>
+
+  <div class="layout">
+    <div class="panel">
+      <label for="file">Document image</label>
+      <label class="filebtn" for="file" id="filebtn" role="button" tabindex="0">Choose image… <span class="hint">(or drag &amp; drop / paste)</span></label>
+      <input type="file" id="file" accept="image/*">
+      <div class="filename" id="filename">No file selected</div>
+
+      <label for="company">Company / recipient</label>
+      <input type="text" id="company" placeholder="e.g. Acme Corp">
+
+      <label for="purpose">Purpose</label>
+      <input type="text" id="purpose" placeholder="e.g. Identity Verification">
+
+      <label for="date">Date</label>
+      <input type="date" id="date">
+
+      <label for="color">Lattice color</label>
+      <div class="row">
+        <input type="color" id="color" value="#808080">
+        <input type="text" id="colortext" value="#808080" style="flex:1" aria-label="Lattice color (name or hex)">
+      </div>
+
+      <label for="opacity">Lattice opacity · <span class="opacityval" id="opacityval">0.80</span></label>
+      <input type="range" id="opacity" min="0.1" max="1" step="0.05" value="0.8">
+
+      <button class="primary" id="download" disabled>Download watermarked PNG</button>
+    </div>
+
+    <div class="preview" id="previewWrap">
+      <div class="empty" id="empty">Choose an image to see a live preview.</div>
+      <canvas id="canvas" hidden></canvas>
+    </div>
+  </div>
+
+  <footer>
+    100% client-side · no upload · no storage. The visible lattice is the deterrent; the file also carries the same text as a PNG
+    <code>comment</code> for tracing.
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+// ----- geometry constants ----------------------------------------------------
+const SQRT_HALF = 0.7071;           // sqrt(2)/2
+const DASH_FRAC = 0.80;             // DASH      = 0.80 * unit
+const GAP_FRAC  = 0.63;             // DASH_GAP  = 0.63 * unit (also HALF_GAP)
+const MARK_FRAC = 0.22;             // MARK_R    = 0.22 * unit
+const STROKE    = 4;                // lattice + X stroke width
+const BOX_ALPHA = 0.922;            // white card opacity
+const TEXT_RGB  = "rgb(20,20,20)";
+const BOX_FONT  = 'Arial, "Helvetica Neue", Helvetica, sans-serif';
+
+// ----- element refs ----------------------------------------------------------
+const el = id => document.getElementById(id);
+const fileInput = el("file"), canvas = el("canvas"), ctx = canvas.getContext("2d");
+const dlBtn = el("download");
+let img = null;
+
+el("date").value = new Date().toISOString().slice(0, 10);
+
+// resolve the lattice color, ignoring invalid input (keep the last valid one)
+let lastColor = "#808080";
+function resolveColor() {
+  const v = (el("colortext").value || el("color").value).trim();
+  if (v && CSS.supports("color", v)) { lastColor = v; return v; }
+  return lastColor;
+}
+
+// keep the color picker and text field in sync
+el("color").addEventListener("input", () => { el("colortext").value = el("color").value; el("colortext").classList.remove("invalid"); render(); });
+el("colortext").addEventListener("input", () => {
+  const v = el("colortext").value.trim();
+  el("colortext").classList.toggle("invalid", !!v && !CSS.supports("color", v));
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(v)) el("color").value = v;
+  render();
+});
+el("opacity").addEventListener("input", () => { el("opacityval").textContent = (+el("opacity").value).toFixed(2); render(); });
+["company", "purpose", "date"].forEach(id => el(id).addEventListener("input", render));
+
+// Download needs both an image and a recipient — the recipient is the whole point of the trace.
+function updateDownloadState() { dlBtn.disabled = !(img && el("company").value.trim()); }
+el("company").addEventListener("input", updateDownloadState);
+
+function setStatus(msg) { el("filename").textContent = msg; }
+
+function loadFile(f) {
+  if (!f) return;
+  if (!f.type || !f.type.startsWith("image/")) { setStatus("That file isn't an image."); return; }
+  setStatus(f.name);
+  fileInput.dataset.name = f.name;
+  const url = URL.createObjectURL(f);
+  const im = new Image();
+  im.onload = () => {
+    URL.revokeObjectURL(url);
+    img = im; el("empty").hidden = true; canvas.hidden = false;
+    updateDownloadState(); render();
+  };
+  im.onerror = () => {
+    URL.revokeObjectURL(url);
+    img = null; canvas.hidden = true; el("empty").hidden = false;
+    updateDownloadState();
+    setStatus("Couldn't load that image — it may be corrupt or an unsupported format.");
+  };
+  im.src = url;
+}
+
+fileInput.addEventListener("change", e => loadFile(e.target.files[0]));
+
+// keyboard-activate the "Choose image" label
+el("filebtn").addEventListener("keydown", e => {
+  if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+});
+
+// drag & drop onto the preview area
+const drop = el("previewWrap");
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("dragover"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("dragover"));
+drop.addEventListener("drop", e => {
+  e.preventDefault(); drop.classList.remove("dragover");
+  if (e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+});
+
+// paste an image from the clipboard
+document.addEventListener("paste", e => {
+  const item = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith("image/"));
+  if (item) loadFile(item.getAsFile());
+});
+
+// prevent an accidental drop outside the zone from navigating away (losing the session)
+["dragover", "drop"].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
+
+// ----- build one lattice tile ------------------------------------------------
+function buildTile(W, color) {
+  const TILE = Math.round(W * 103 / 300);
+  const HALF = TILE * SQRT_HALF;
+  const unit = HALF / 13;
+  const DASH = unit * DASH_FRAC;
+  const GAP  = unit * GAP_FRAC;          // inter-dash gap
+  const HALF_GAP = GAP;                  // vertex -> first dash
+  const GROUP_GAP = HALF - 2 * HALF_GAP - 6 * DASH - 4 * GAP;
+  const MARK = unit * MARK_FRAC;
+
+  // dash [start,end] positions along one half-diagonal (corner -> centre)
+  const half = base => {
+    let p = base + HALF_GAP; const s = [];
+    const dash = () => { s.push([p, p + DASH]); p += DASH; };
+    dash(); p += GAP; dash(); p += GAP; dash();
+    p += GROUP_GAP;
+    dash(); p += GAP; dash(); p += GAP; dash();
+    return s;
+  };
+  const segs = half(0).concat(half(HALF));
+
+  const t = document.createElement("canvas");
+  t.width = t.height = TILE;
+  const c = t.getContext("2d");
+  c.strokeStyle = color;
+  c.lineWidth = STROKE;
+  c.lineCap = "butt";
+
+  // diagonals: map half-diagonal position -> pixels (x=y=pos/sqrt2), both directions
+  c.beginPath();
+  for (const [s0, s1] of segs) {
+    const a = s0 * SQRT_HALF, b = s1 * SQRT_HALF;
+    c.moveTo(a, a);           c.lineTo(b, b);            // main diagonal
+    c.moveTo(TILE - a, a);    c.lineTo(TILE - b, b);     // anti-diagonal
+  }
+  c.stroke();
+
+  // X marks: centre + 4 corners (corners completed by neighbouring tiles)
+  const cross = (cx, cy) => {
+    c.moveTo(cx - MARK, cy - MARK); c.lineTo(cx + MARK, cy + MARK);
+    c.moveTo(cx - MARK, cy + MARK); c.lineTo(cx + MARK, cy - MARK);
+  };
+  c.beginPath();
+  cross(TILE / 2, TILE / 2);
+  cross(0, 0); cross(TILE, 0); cross(0, TILE); cross(TILE, TILE);
+  c.stroke();
+
+  return { tile: t, TILE };
+}
+
+// Cache the tile — it only depends on image width + color, so opacity/text
+// changes (and slider drags) reuse it instead of redrawing every frame.
+let tileCache = { key: null };
+function getTile(W, color) {
+  const key = W + "|" + color;
+  if (tileCache.key !== key) tileCache = { key, ...buildTile(W, color) };
+  return tileCache;
+}
+
+// ----- draw the info card ----------------------------------------------------
+function drawCard(W, H) {
+  const maxDim = Math.max(W, H);
+  const fontSize = 24 * maxDim / 1000;
+  const pad = 12 * maxDim / 1000;
+  const margin = 16 * maxDim / 1000;
+  const radius = 10;
+  const lines = [el("company").value, el("purpose").value, el("date").value]
+    .map(s => s.trim()).filter(Boolean);
+  if (!lines.length) return;
+
+  ctx.font = fontSize + "px " + BOX_FONT;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+
+  const m = ctx.measureText("Ag");
+  const inkH = (m.actualBoundingBoxAscent || fontSize * 0.72) + (m.actualBoundingBoxDescent || fontSize * 0.2);
+  const lineH = Math.round(inkH) + 6;
+  const textW = Math.max(...lines.map(l => ctx.measureText(l).width));
+
+  const boxW = textW + 2 * pad;
+  const boxH = lines.length * lineH + 2 * pad;
+
+  ctx.fillStyle = "rgba(255,255,255," + BOX_ALPHA + ")";
+  ctx.beginPath();
+  ctx.roundRect(margin, margin, boxW, boxH, radius);
+  ctx.fill();
+
+  ctx.fillStyle = TEXT_RGB;
+  lines.forEach((line, i) => {
+    const y = margin + pad + i * lineH + lineH / 2;
+    ctx.fillText(line, margin + pad, y);
+  });
+}
+
+// ----- full render -----------------------------------------------------------
+function render() {
+  if (!img) return;
+  const W = img.naturalWidth, H = img.naturalHeight;
+  canvas.width = W; canvas.height = H;
+
+  ctx.clearRect(0, 0, W, H);
+  ctx.drawImage(img, 0, 0);
+
+  // tiled lattice, centred so the grid is symmetric about the image centre
+  const color = resolveColor();
+  const { tile, TILE } = getTile(W, color);
+  const repeatsX = Math.floor(W / TILE) + 2;
+  const repeatsY = Math.floor(H / TILE) + 2;
+  const offX = (repeatsX * TILE - W) / 2;
+  const offY = (repeatsY * TILE - H) / 2;
+
+  ctx.save();
+  ctx.globalAlpha = +el("opacity").value;
+  ctx.fillStyle = ctx.createPattern(tile, "repeat");
+  ctx.translate(-offX, -offY);
+  ctx.fillRect(offX, offY, W, H);
+  ctx.restore();
+
+  drawCard(W, H);
+}
+
+// ----- PNG iTXt comment injection (UTF-8, for the tracing metadata) ----------
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+function crc32(bytes) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function insertComment(png, text) {
+  const enc = new TextEncoder();
+  const keyword = enc.encode("comment");   // Latin-1 keyword
+  const txt = enc.encode(text);            // UTF-8 text (accents / non-Latin safe)
+  // iTXt layout: keyword \0  compFlag(0) compMethod(0)  langTag \0  transKeyword \0  text
+  const data = new Uint8Array(keyword.length + 5 + txt.length);
+  let o = 0;
+  data.set(keyword, o); o += keyword.length;
+  o += 1;              // keyword null terminator (already 0)
+  o += 1;              // compression flag = 0 (uncompressed)
+  o += 1;              // compression method = 0
+  o += 1;              // language tag: empty + null
+  o += 1;              // translated keyword: empty + null
+  data.set(txt, o);
+  const type = enc.encode("iTXt");
+  const chunk = new Uint8Array(12 + data.length);
+  const dv = new DataView(chunk.buffer);
+  dv.setUint32(0, data.length);
+  chunk.set(type, 4);
+  chunk.set(data, 8);
+  const crcSrc = new Uint8Array(4 + data.length);
+  crcSrc.set(type, 0); crcSrc.set(data, 4);
+  dv.setUint32(8 + data.length, crc32(crcSrc));
+  const iend = png.length - 12;                       // IEND is always the final 12 bytes
+  const out = new Uint8Array(png.length + chunk.length);
+  out.set(png.subarray(0, iend), 0);
+  out.set(chunk, iend);
+  out.set(png.subarray(iend), iend + chunk.length);
+  return out;
+}
+
+// ----- download --------------------------------------------------------------
+dlBtn.addEventListener("click", () => {
+  if (!img) return;
+  const company = el("company").value.trim(), purpose = el("purpose").value.trim(), date = el("date").value.trim();
+  if (!company) return;
+  let comment = `Provided exclusively to ${company}`;
+  if (purpose) comment += ` for ${purpose}`;
+  if (date) comment += ` on ${date}`;
+  canvas.toBlob(blob => {
+    blob.arrayBuffer().then(buf => {
+      const out = insertComment(new Uint8Array(buf), comment);
+      const url = URL.createObjectURL(new Blob([out], { type: "image/png" }));
+      const base = (fileInput.dataset.name || "image").replace(/\.[^.]+$/, "");
+      const a = document.createElement("a");
+      a.href = url; a.download = base + "-watermarked.png";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+  }, "image/png");
+});
+</script>
+</body>
+</html>
