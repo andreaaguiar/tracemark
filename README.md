@@ -6,9 +6,9 @@ party for a specific purpose without being silently reused elsewhere.
 
 It applies two things:
 
-1. **A repeating diamond lattice** across the whole image — dashed 45°/135°
+1. **A repeating diamond lattice** across the whole image: dashed 45°/135°
    diagonal lines with an X at every intersection. Because it covers the entire
-   page, it can't be removed by cropping.
+   page, it cannot be removed by cropping.
 2. **A rounded info card** in the top-left corner showing who the copy was given
    to, why, and when.
 
@@ -18,19 +18,19 @@ It also embeds the same text as a PNG comment for forensic tracing (see
 ## Privacy
 
 Everything runs **entirely in your browser**. The image is read, watermarked,
-and downloaded on your own device — it is **never uploaded**, and there is no
+and downloaded on your own device. It is **never uploaded**, and there is no
 server, storage, or backend involved.
 
 ## Use it
 
 ### Online
 
-Just open **https://andreaaguiar.github.io/tracemark/**, choose an image, fill in
+Open **https://andreaaguiar.github.io/tracemark/**, choose an image, fill in
 the fields, and click **Download**.
 
 ### Locally
 
-`index.html` is completely self-contained (no dependencies, no build step), so you can open
+`index.html` is self-contained (no dependencies, no build step), so you can open
 it directly in a browser, or serve the folder:
 
 ```sh
@@ -42,11 +42,11 @@ python3 -m http.server   # then visit http://localhost:8000
 | Field        | Notes                                                        |
 |--------------|--------------------------------------------------------------|
 | Document     | The image to watermark (never leaves your device).           |
-| Company      | Who the copy is provided to — shown on the card and traced.  |
+| Company      | Who the copy is provided to (shown on the card and traced).  |
 | Purpose      | Why the copy is being shared.                                |
-| Date         | Shown on the card; defaults to today.                        |
-| Lattice color| Any color; defaults to gray (`#808080`).                     |
-| Opacity      | Lattice visibility; defaults to `0.80`.                      |
+| Date         | Shown on the card. Defaults to today.                        |
+| Lattice color| Any color. Defaults to gray (`#808080`).                     |
+| Opacity      | Lattice visibility. Defaults to `0.80`.                      |
 
 The download is named `<input>-watermarked.png`.
 
@@ -69,7 +69,7 @@ Running [`id.png`](id.png) through the tool (company "Acme Corp", purpose
   (≈ 24.3% of the image width).
 - Each dash segment's exact endpoints are computed and drawn individually, so
   every X lands precisely centered in a gap. Each half-diagonal reads:
-  `[X] gap dash gap dash gap dash — BIG gap — dash gap dash gap dash gap [X]`.
+  `[X] gap dash gap dash gap dash - BIG gap - dash gap dash gap dash gap [X]`.
 - The lattice is tiled onto the canvas and centered, so the grid is symmetric
   about the middle of the image.
 
@@ -85,7 +85,7 @@ Running [`id.png`](id.png) through the tool (company "Acme Corp", purpose
 The output PNG carries the sentence
 `Provided exclusively to <company> for <purpose> on <date>` as a UTF-8 `iTXt`
 `comment` chunk, injected into the PNG bytes in the browser. This is a
-**secondary, best-effort trace only** — PNG comments are trivially stripped by
+**secondary, best-effort trace only**. PNG comments are trivially stripped by
 re-saving, screenshotting, or most sharing platforms, so the visible lattice
 remains the real deterrent. Read it back with any PNG metadata tool, e.g.:
 
@@ -101,3 +101,7 @@ exiftool -Comment out.png                        # exiftool
 - Output is always PNG (the tracing comment relies on the PNG comment chunk).
 - Re-encoding through the canvas drops the source image's metadata (EXIF/GPS),
   so the original scan's camera and location data are not carried into the copy.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
