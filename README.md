@@ -101,7 +101,3 @@ exiftool -Comment out.png                        # exiftool
 - Output is always PNG (the tracing comment relies on the PNG comment chunk).
 - Re-encoding through the canvas drops the source image's metadata (EXIF/GPS),
   so the original scan's camera and location data are not carried into the copy.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
